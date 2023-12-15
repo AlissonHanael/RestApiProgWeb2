@@ -8,18 +8,17 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
-import br.edu.ifpr.api__noticias.Services.FileStorageService;
 import br.edu.ifpr.api__noticias.model.Noticia;
 import br.edu.ifpr.api__noticias.repositorio.NewsRepository;
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -30,9 +29,6 @@ public class NewsController {
   @Autowired
   private NewsRepository _NewsRepository;
 
-  @Autowired
-  private FileStorageService _fileStorageService;
-
   @GetMapping(value = "/news")
   public List<Noticia> get() {
     return (List<Noticia>) _NewsRepository.findAll();
@@ -41,6 +37,7 @@ public class NewsController {
   @GetMapping(value = "/news/{id}")
   public ResponseEntity<Noticia> getNoticia(@PathVariable("id") long id) {
     Optional<Noticia> noticia = _NewsRepository.findById(id);
+
     if (noticia.isPresent()) {
       return new ResponseEntity<Noticia>(noticia.get(), HttpStatus.OK);
     } else {
@@ -73,20 +70,24 @@ public class NewsController {
     }
   }
 
-  @PostMapping(value = "/news", consumes = "multipart/form-data")
-  public ResponseEntity<?> createNews(@RequestBody Noticia news,
-      @RequestParam("archive_name") MultipartFile archive_name) {
-    Map<String, Object> map = new HashMap<>();
-    try {
-      Noticia savedNews = _NewsRepository.save(news);
-      _fileStorageService.save(archive_name);
-      savedNews.setArchive_name(archive_name.getOriginalFilename());
-      _NewsRepository.save(savedNews);
-      map.put("arquivo", archive_name.getOriginalFilename());
-      return new ResponseEntity<>(map, HttpStatus.CREATED);
-    } catch (Exception e) {
-      map.put("erro", e.getMessage());
+  @PostMapping(value = "/news")
+  public ResponseEntity<?> createNews(@RequestBody @Valid Noticia noticia, BindingResult result) {
+    Map<String, Object> map = new HashMap<String, Object>();
+    if (result.hasErrors()) {
+      map.put("status", HttpStatus.BAD_REQUEST.value());
+      map.put("errors", result.getAllErrors());
       return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
+    } else {
+      try {
+        Noticia savedNoticia = _NewsRepository.save(noticia);
+        map.put("status", HttpStatus.CREATED.value());
+        map.put("data", savedNoticia);
+        return new ResponseEntity<>(map, HttpStatus.CREATED);
+      } catch (Exception e) {
+        map.put("status", HttpStatus.BAD_REQUEST.value());
+        map.put("error", e.getMessage());
+        return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
+      }
     }
   }
 

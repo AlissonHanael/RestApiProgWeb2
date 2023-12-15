@@ -1,62 +1,54 @@
 package br.edu.ifpr.api__noticias.model;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Transient;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 
 @Entity
 public class Noticia {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private long id;
+  private Long id;
   private String title;
   private String news_abstract;
   private String news_text;
-  private LocalDate pub_date;
-  private String category;
+  private Date pub_date = new Date();
 
-  @ManyToOne
-  @JoinColumn(name = "usuario_id") // Corrija para o nome correto da coluna de relacionamento
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "id_category")
+  private Category category;
+
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "id_usuario") // Corrija para o nome correto da coluna de relacionamento
   private Usuario author;
 
-  @NotNull
-  private String archive_name;
-
-  @Null
-  @Transient
-  private String directory;
   private int counter;
 
   public Noticia() {
   }
 
   // Ajuste o construtor para receber o nome do arquivo
-  public Noticia(String title, String news_abstract, String news_text, String category, Usuario author,
+  public Noticia(String title, String news_abstract, String news_text, Category category, Usuario author,
       String archive_name, String directory, int counter) {
     this.title = title;
     this.news_abstract = news_abstract;
     this.news_text = news_text;
-    this.pub_date = LocalDate.now();
-    this.category = "Categoria Pré-definida"; // Ajuste para aceitar uma categoria como parâmetro
+    this.category = category; // Ajuste para aceitar uma categoria como parâmetro
     this.author = author;
-    this.archive_name = archive_name;
-    this.directory = directory;
     this.counter = counter;
   }
 
-  public long getId() {
+  public Long getId() {
     return this.id;
   }
 
-  public void setId(long id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
@@ -84,19 +76,19 @@ public class Noticia {
     this.news_text = news_text;
   }
 
-  public LocalDate getPub_date() {
+  public Date getPub_date() {
     return this.pub_date;
   }
 
-  public void setPub_date(LocalDate pub_date) {
+  public void setPub_date(Date pub_date) {
     this.pub_date = pub_date;
   }
 
-  public String getCategory() {
+  public Category getCategory() {
     return this.category;
   }
 
-  public void setCategory(String category) {
+  public void setCategory(Category category) {
     this.category = category;
   }
 
@@ -106,22 +98,6 @@ public class Noticia {
 
   public void setAuthor(Usuario author) {
     this.author = author;
-  }
-
-  public String getArchive_name() {
-    return this.archive_name;
-  }
-
-  public void setArchive_name(String archive_name) {
-    this.archive_name = archive_name;
-  }
-
-  public String getDirectory() {
-    return this.directory;
-  }
-
-  public void setDirectory(String directory) {
-    this.directory = directory;
   }
 
   public int getCounter() {

@@ -29,11 +29,14 @@ public class FiltroToken extends OncePerRequestFilter {
     String token;
 
     var authenticationHeader = request.getHeader("Authorization");
+
     if (authenticationHeader != null) {
       token = authenticationHeader;
       Optional<Usuario> usuario = this._usuarioRepositorio.findBykeytoken(token);
+
       if (usuario.isPresent()) {
-        var authentication = new UsernamePasswordAuthenticationToken(usuario.get(), null, null);
+        var authentication = new UsernamePasswordAuthenticationToken(usuario.get(),
+            null, null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
       } else {
         response.setStatus(HttpStatus.FORBIDDEN.value());

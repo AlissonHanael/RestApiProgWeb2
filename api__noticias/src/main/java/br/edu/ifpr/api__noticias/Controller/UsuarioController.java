@@ -47,9 +47,7 @@ public class UsuarioController {
         map.put("Error", e.getMessage());
         return new ResponseEntity<Object>(map, HttpStatus.BAD_REQUEST);
       }
-
     }
-
   }
 
   @PostMapping(value = "/login")
@@ -70,5 +68,4 @@ public class UsuarioController {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
-
 }
