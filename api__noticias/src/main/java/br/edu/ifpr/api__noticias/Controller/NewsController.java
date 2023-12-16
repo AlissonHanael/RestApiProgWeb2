@@ -37,8 +37,9 @@ public class NewsController {
   @GetMapping(value = "/news/{id}")
   public ResponseEntity<Noticia> getNoticia(@PathVariable("id") long id) {
     Optional<Noticia> noticia = _NewsRepository.findById(id);
-
+    Noticia result = noticia.get();
     if (noticia.isPresent()) {
+      _NewsRepository.updateCounter(result.getId());
       return new ResponseEntity<Noticia>(noticia.get(), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);

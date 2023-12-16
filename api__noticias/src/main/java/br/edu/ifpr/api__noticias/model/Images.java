@@ -26,8 +26,9 @@ public class Images {
   @JoinColumn(name = "news_id")
   private Noticia news_id;
 
-  public Images(String nome) {
+  public Images(String nome, Noticia news_id) {
 
+    this.news_id = news_id;
     this.nome = nome;
   }
 
